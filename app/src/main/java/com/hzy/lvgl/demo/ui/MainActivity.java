@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.blankj.utilcode.util.ActivityUtils;
 import com.hzy.lvgl.demo.databinding.ActivityMainBinding;
 
 
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         mB.btnBenchmark.setOnClickListener(v -> openPartPage("benchmark"));
         mB.btnPvz.setOnClickListener(v -> openPartPage("pvz"));
         mB.btnTetris.setOnClickListener(v -> openPartPage("tetris"));
+        mB.btnLarge.setOnClickListener(v -> ActivityUtils.startActivity(FullScreenActivity.class));
     }
 
     private void openPartPage(String name) {
