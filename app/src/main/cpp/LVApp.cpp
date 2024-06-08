@@ -82,9 +82,13 @@ void LVApp::lv_loop_task() {
     lv_app_func();
     ANativeWindow_acquire(window);
     while (is_running) {
+        auto start = clock();
         lv_task_handler();
-        lv_tick_inc(4);
-        usleep(1000);
+        lv_tick_inc(10);
+        auto period = clock() - start;
+        if (period < 4000) {
+            usleep(4000 - period);
+        }
     }
     ANativeWindow_release(window);
     lv_deinit();

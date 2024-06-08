@@ -233,14 +233,12 @@ void pvz_start() {
     cherry_btn_select = 0;
     nuclear_btn_select = 0;
 
-    for (int i = 0; i < max_quantity; ++i) {
-        memset(&wogua[i], 0, sizeof(wogua_type));
-        memset(&zidan[i], 0, sizeof(zidan_type));
-        memset(&sunflower[i], 0, sizeof(sunflower_type));
-        memset(&wandouflower[i], 0, sizeof(wandou_type));
-        memset(&shine[i], 0, sizeof(shine_type));
-        memset(&zb_matrix[i], 0, sizeof(zb_type));
-    }
+    memset(wogua, 0, sizeof(wogua));
+    memset(zidan, 0, sizeof(zidan));
+    memset(sunflower, 0, sizeof(sunflower));
+    memset(wandouflower, 0, sizeof(wandouflower));
+    memset(shine, 0, sizeof(shine));
+    memset(zb_matrix, 0, sizeof(zb_matrix));
 
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
     map1 = lv_img_create(lv_scr_act());
