@@ -19,8 +19,8 @@ private:
     lv_indev_drv_t indev_drv;
     uint16_t *surface_buf = nullptr;
     size_t surface_size = 0;
-    int isTouch, touchX, touchY;
     string app_name;
+    atomic<int> isTouch, touchX, touchY;
     atomic<bool> is_running = false;
 
     void lv_flush_callback(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
