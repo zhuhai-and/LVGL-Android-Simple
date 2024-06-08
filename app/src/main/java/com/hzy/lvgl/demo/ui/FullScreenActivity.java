@@ -15,6 +15,6 @@ public class FullScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mB = ActivityFullScreenBinding.inflate(getLayoutInflater());
         setContentView(mB.getRoot());
-        mB.lvView.setApp("widgets");
+        mB.lvView.setApp("pvz");
     }
 }

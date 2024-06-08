@@ -1,16 +1,15 @@
-#include <stdio.h>
 #include "lvgl.h"
 #include "stdlib.h"
 
 
-#define  max_quantity  20  //ÿ�ֽ�ɫ�������15
-#define  zb_maxlive    10  //��ʬ���Ѫ��10
-#define  zb_period     5000   //��ʬ��������7000MS
-#define  zidan_speed   20    //�ӵ�ÿ20ms��һ������
-#define  shine_period  5000  //������������5000ms
-#define  zb_move_speed 200   //��ʬ�ƶ��ٶ�200ms��һ������
-#define  plant_stackable  0  //ֲ��ɵ��ӷ��ã�1�ɵ��ӣ�0���ɵ��ӣ�
-#define  sunflower_add_sun_period  5000   //���տ�������������5000ms
+#define  max_quantity  20  //每种角色最大数量15
+#define  zb_maxlive    10  //僵尸最大血量10
+#define  zb_period     5000   //僵尸产生周期7000MS
+#define  zidan_speed   20    //子弹每20ms飞一个像素
+#define  shine_period  5000  //阳光生产周期5000ms
+#define  zb_move_speed 200   //僵尸移动速度200ms走一个像素
+#define  plant_stackable  0  //植物可叠加放置（1可叠加，0不可叠加）
+#define  sunflower_add_sun_period  5000   //向日葵阳光生产周期5000ms
 
 
 static int nuclear_btn_select;
@@ -127,7 +126,6 @@ typedef struct {
 
 static char map_flag[5][9] = {0,};
 static wogua_type wogua[max_quantity] = {0,};
-static timer_type add_zidan_timer[max_quantity] = {0,};
 static zidan_type zidan[max_quantity] = {0,};
 static sunflower_type sunflower[max_quantity] = {0,};
 static wandou_type wandouflower[max_quantity] = {0,};
@@ -227,7 +225,6 @@ static void nuclear_delete_cb(lv_anim_t *a);
 static void nuclear_anim_cb(void *var, int32_t v);
 
 void pvz_start() {
-
     sun_score = 0;
     chanzi_btn_select = 0;
     sunflower_btn_select = 0;
@@ -235,6 +232,15 @@ void pvz_start() {
     wogua_btn_select = 0;
     cherry_btn_select = 0;
     nuclear_btn_select = 0;
+
+    for (int i = 0; i < max_quantity; ++i) {
+        memset(&wogua[i], 0, sizeof(wogua_type));
+        memset(&zidan[i], 0, sizeof(zidan_type));
+        memset(&sunflower[i], 0, sizeof(sunflower_type));
+        memset(&wandouflower[i], 0, sizeof(wandou_type));
+        memset(&shine[i], 0, sizeof(shine_type));
+        memset(&zb_matrix[i], 0, sizeof(zb_type));
+    }
 
     lv_obj_clear_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
     map1 = lv_img_create(lv_scr_act());
@@ -333,7 +339,7 @@ void pvz_start() {
 
 void wogua_dead_cb(void *var, int32_t v) {
     int x, y;
-    lv_obj_t * user = (lv_obj_t *) var;
+    lv_obj_t *user = (lv_obj_t *) var;
 
     x = lv_obj_get_x(user) + 1;
     y = lv_obj_get_y(user) - 1;
@@ -344,7 +350,7 @@ void wogua_dead_cb(void *var, int32_t v) {
 
 void wogua_dead_cb2(void *var, int32_t v) {
     int y;
-    lv_obj_t * user = (lv_obj_t *) var;
+    lv_obj_t *user = (lv_obj_t *) var;
 
     y = lv_obj_get_y(user) + 1;
     lv_obj_set_y(user, y);
@@ -352,7 +358,7 @@ void wogua_dead_cb2(void *var, int32_t v) {
 
 
 void wogua_dead_cb3(void *var, int32_t v) {
-    lv_obj_t * user = (lv_obj_t *) var;
+    lv_obj_t *user = (lv_obj_t *) var;
     lv_obj_set_style_img_opa(user, v, LV_PART_MAIN);
 }
 
@@ -366,7 +372,7 @@ void wogua_delect_cb(lv_anim_t *a) {
 
 
 void hit_zb_cb(void *var, int32_t v) {
-    lv_obj_t * user = (lv_obj_t *) var;
+    lv_obj_t *user = (lv_obj_t *) var;
 
     lv_obj_set_style_img_opa(user, v, 0);
 
@@ -374,7 +380,7 @@ void hit_zb_cb(void *var, int32_t v) {
 
 
 void nuclear_anim_cb(void *var, int32_t v) {
-    lv_obj_t * nuclear = (lv_obj_t *) var;
+    lv_obj_t *nuclear = (lv_obj_t *) var;
     lv_obj_set_y(nuclear, v);
     lv_img_set_zoom(nuclear, 155 - v);
 }
@@ -382,9 +388,9 @@ void nuclear_anim_cb(void *var, int32_t v) {
 
 void nuclear_delete_cb(lv_anim_t *a) {
     int i;
-    lv_obj_t * nuclear = (lv_obj_t *) a->var;
+    lv_obj_t *nuclear = (lv_obj_t *) a->var;
 
-    lv_obj_t * nuclear_boom = lv_img_create(map1);
+    lv_obj_t *nuclear_boom = lv_img_create(map1);
     lv_img_set_src(nuclear_boom, &nuclear_boom_img);
     lv_obj_center(nuclear_boom);
 
@@ -428,7 +434,7 @@ void nuclear_delete_cb(lv_anim_t *a) {
 
 
 void cherry_anim_cb(void *var, int32_t v) {
-    lv_obj_t * cherry = (lv_obj_t *) var;
+    lv_obj_t *cherry = (lv_obj_t *) var;
 
     lv_img_set_zoom(cherry, 255 + v * 15);
 
@@ -437,11 +443,11 @@ void cherry_anim_cb(void *var, int32_t v) {
 
 void cherry_delete_cb(lv_anim_t *a) {
     int i;
-    lv_obj_t * cherry = (lv_obj_t *) a->var;
+    lv_obj_t *cherry = (lv_obj_t *) a->var;
     int x = lv_obj_get_x(cherry);
     int y = lv_obj_get_y(cherry);
 
-    lv_obj_t * boom = lv_img_create(map1);
+    lv_obj_t *boom = lv_img_create(map1);
     lv_img_set_src(boom, &cherry_boom_img);
     lv_img_set_zoom(boom, 400);
     lv_obj_set_pos(boom, x - 30, y - 10);
@@ -457,8 +463,9 @@ void cherry_delete_cb(lv_anim_t *a) {
     lv_anim_start(&a1);
 
     for (i = 0; i < max_quantity; i++) {
-        if (zb_matrix[i].live > 0 && lv_obj_get_x(zb_matrix[i].zb) - x < 80 && x - lv_obj_get_x(zb_matrix[i].zb) < 80 &&
-            lv_obj_get_y(zb_matrix[i].zb) - y < 80 && y - lv_obj_get_y(zb_matrix[i].zb) < 80) {
+        if (zb_matrix[i].live > 0 && lv_obj_get_x(zb_matrix[i].zb) - x < 80 &&
+            x - lv_obj_get_x(zb_matrix[i].zb) < 80 && lv_obj_get_y(zb_matrix[i].zb) - y < 80 &&
+            y - lv_obj_get_y(zb_matrix[i].zb) < 80) {
             zb_matrix[i].live = 0;
 
             lv_anim_del(zb_matrix[i].zb, zb_move_cb);
@@ -487,7 +494,7 @@ void cherry_delete_cb(lv_anim_t *a) {
 
 
 void boom_delete_cb(lv_anim_t *a) {
-    lv_obj_t * boom = (lv_obj_t *) a->var;
+    lv_obj_t *boom = (lv_obj_t *) a->var;
 
     lv_obj_del(boom);
 
@@ -498,19 +505,19 @@ void boom_anim_cb(void *var, int32_t v) {
 }
 
 void nuclear_boom_anim_cb(void *var, int32_t v) {
-    lv_obj_t * nuclear_boom = (lv_obj_t *) var;
+    lv_obj_t *nuclear_boom = (lv_obj_t *) var;
     lv_img_set_zoom(nuclear_boom, 255 + v * 20);
 }
 
 
 void nuclear_boom_delete_cb(lv_anim_t *a) {
-    lv_obj_t * nuclear_boom = (lv_obj_t *) a->var;
+    lv_obj_t *nuclear_boom = (lv_obj_t *) a->var;
 
     lv_obj_del(nuclear_boom);
 }
 
 void anim_zb_dead_cb(void *var, int32_t v) {
-    lv_obj_t * user = (lv_obj_t *) var;
+    lv_obj_t *user = (lv_obj_t *) var;
 
     if (v < 80) { lv_img_set_angle(user, -v * 10); }
     else {
@@ -547,9 +554,7 @@ void timer_led_cb(lv_timer_t *t) {
 
 
 void timer_cb1(lv_timer_t *t) {
-    int i, j;
-
-    for (j = 0; j < max_quantity; j++) {
+    for (int j = 0; j < max_quantity; j++) {
         if (zb_matrix[j].alive == 0) {
             zb_matrix[j].alive = 1;
             zb_matrix[j].live = zb_maxlive;
@@ -570,10 +575,8 @@ void timer_cb1(lv_timer_t *t) {
             lv_anim_set_playback_time(&a, 1900);
             lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
             lv_anim_start(&a);
-
             return;
         }
-
     }
 }
 
@@ -627,17 +630,17 @@ void timer_cb3(lv_timer_t *t) {
 
 
 void shine_start_cb1(void *var, int32_t v) {
-    lv_obj_t * xxx = (lv_obj_t *) var;
+    lv_obj_t *xxx = (lv_obj_t *) var;
     lv_obj_set_y(xxx, v);
 }
 
 
 void add_zidan_cb(lv_timer_t *t) {
     int x, y, i, j;
-
     wandou_type *user = (wandou_type *) t->user_data;
     x = user->x;
     y = user->y;
+
 
     for (i = 0; i < max_quantity; i++) {
         if (zidan[i].alive == 0) {
@@ -664,7 +667,6 @@ void add_zidan_cb(lv_timer_t *t) {
 
 void zidan_move(lv_timer_t *t) {
     int i, j;
-
     for (i = 0; i < max_quantity; i++) {
         if (zidan[i].alive == 1) {
             zidan[i].x += 5;
@@ -678,16 +680,17 @@ void zidan_move(lv_timer_t *t) {
 
     for (i = 0; i < max_quantity; i++) {
         if (zb_matrix[i].live > 0) {
-
             for (j = 0; j < max_quantity; j++) {
-                if ((zidan[j].alive > 0 && zb_matrix[i].y == zidan[j].y) && (zb_matrix[i].x - zidan[j].x < 6)) {
+                if ((zidan[j].alive > 0 && zb_matrix[i].y == zidan[j].y) &&
+                    (zb_matrix[i].x - zidan[j].x < 6)) {
                     zb_matrix[i].live--;
                     zidan[j].alive = 0;
                     lv_img_set_angle(zb_matrix[i].zb, 100);
 
-                    lv_obj_t * zidan_split = lv_img_create(map1);
+                    lv_obj_t *zidan_split = lv_img_create(map1);
                     lv_img_set_src(zidan_split, &zidan_split_img);
-                    lv_obj_set_pos(zidan_split, lv_obj_get_x(zidan[j].zidan) - 8, lv_obj_get_y(zidan[j].zidan) - 8);
+                    lv_obj_set_pos(zidan_split, lv_obj_get_x(zidan[j].zidan) - 8,
+                                   lv_obj_get_y(zidan[j].zidan) - 8);
 
                     lv_obj_del(zidan[j].zidan);
 
@@ -731,6 +734,7 @@ void zidan_move(lv_timer_t *t) {
                     lv_anim_set_ready_cb(&a, anim_zb_delect_cb);
                     lv_anim_start(&a);
 
+
                     break;
                 }
 
@@ -745,7 +749,8 @@ void zidan_move(lv_timer_t *t) {
         if (zb_matrix[i].live > 0) {
 
             for (j = 0; j < max_quantity; j++) {
-                if ((wogua[j].live > 0 && zb_matrix[i].y == wogua[j].y) && (zb_matrix[i].x - wogua[j].x * 49 < 80)) {
+                if ((wogua[j].live > 0 && zb_matrix[i].y == wogua[j].y) &&
+                    (zb_matrix[i].x - wogua[j].x * 49 < 80)) {
                     wogua[j].live = 0;
                     zb_matrix[i].live = 0;
 
@@ -812,7 +817,7 @@ void zidan_move(lv_timer_t *t) {
 
 
 void zb_del_start_cb(lv_anim_t *a) {
-    lv_obj_t * xxx = (lv_obj_t *) a->var;
+    lv_obj_t *xxx = (lv_obj_t *) a->var;
     lv_obj_set_style_img_recolor(xxx, lv_color_hex(0x000000), 0);
     lv_obj_set_style_img_recolor_opa(xxx, 255, 0);
 
@@ -853,25 +858,25 @@ void zidan_split_cb(void *var, int32_t v) {
 }
 
 void zidan_split_delect_cb(lv_anim_t *a) {
-    lv_obj_t * xxx = (lv_obj_t *) a->var;
+    lv_obj_t *xxx = (lv_obj_t *) a->var;
 
     lv_obj_del(xxx);
 }
 
 void zb_move_cb(void *var, int32_t v) {
-    lv_obj_t * xxx = (lv_obj_t *) var;
+    lv_obj_t *xxx = (lv_obj_t *) var;
     lv_img_set_angle(xxx, v * 10);
 
 }
 
 
 void anim_cb1(void *var, int32_t v) {
-    lv_obj_t * xxx = (lv_obj_t *) var;
+    lv_obj_t *xxx = (lv_obj_t *) var;
     lv_obj_set_x(xxx, v);
 }
 
 void anim_cb2(void *var, int32_t v) {
-    lv_obj_t * xxx = (lv_obj_t *) var;
+    lv_obj_t *xxx = (lv_obj_t *) var;
     lv_obj_set_y(xxx, v);
 }
 
@@ -1063,7 +1068,7 @@ void map_click_cb(lv_event_t *e) {
 
 
     if (cherry_btn_select && (sun_score > 299)) {
-        lv_obj_t * cherry = lv_img_create(map1);
+        lv_obj_t *cherry = lv_img_create(map1);
         lv_img_set_src(cherry, &cherry_img);
         lv_obj_clear_flag(cherry, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_pos(cherry, x * 49 + 20, y * 54 + 44);
@@ -1090,7 +1095,7 @@ void map_click_cb(lv_event_t *e) {
 
 
     if (nuclear_btn_select && (sun_score > 399)) {
-        lv_obj_t * nuclear = lv_img_create(map1);
+        lv_obj_t *nuclear = lv_img_create(map1);
         lv_img_set_src(nuclear, &nuclear_img);
         lv_obj_clear_flag(nuclear, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_pos(nuclear, 225, -100);
@@ -1151,7 +1156,9 @@ void map_click_cb(lv_event_t *e) {
                 lv_label_set_text_fmt(score_lable, "%d", sun_score);
                 lv_obj_clear_flag(map1, LV_OBJ_FLAG_CLICKABLE);
                 sunflower_btn_select = 0;
-                sunflower[j].sunflowertimer = lv_timer_create(sun_creat_cb, sunflower_add_sun_period, &sunflower[j]);
+                sunflower[j].sunflowertimer = lv_timer_create(sun_creat_cb,
+                                                              sunflower_add_sun_period,
+                                                              &sunflower[j]);
                 lv_obj_set_style_border_opa(sunflower_btn, 0, LV_PART_MAIN);
                 break;
             }

@@ -3,25 +3,27 @@
 #include "LVApp.h"
 #include "LVHelper.h"
 #include <lv_demos.h>
+#include <unistd.h>
 
 using namespace std;
 
 void LVApp::lv_flush_callback(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
-    ANativeWindow_lock(window, &windowBuffer, nullptr);
-    if (surface_buf == nullptr) {
-        surface_size = sizeof(uint16_t) * windowBuffer.stride * windowBuffer.height;
-        surface_buf = (uint16_t *) malloc(surface_size);
+    if (ANativeWindow_lock(window, &windowBuffer, nullptr) == 0) {
+        if (surface_buf == nullptr) {
+            surface_size = sizeof(uint16_t) * windowBuffer.stride * windowBuffer.height;
+            surface_buf = (uint16_t *) malloc(surface_size);
+        }
+        int w = area->x2 - area->x1 + 1;
+        int h = area->y2 - area->y1 + 1;
+        auto *src = &(color_p->full);
+        auto stride = windowBuffer.stride;
+        for (int i = 0; i < h; i++) {
+            auto *dst = &surface_buf[(area->y1 + i) * stride + area->x1];
+            memcpy(dst, &src[i * w], sizeof(uint16_t) * w);
+        }
+        auto *dst = (uint32_t *) windowBuffer.bits;
+        memcpy(dst, surface_buf, surface_size);
     }
-    int w = area->x2 - area->x1 + 1;
-    int h = area->y2 - area->y1 + 1;
-    auto *src = &(color_p->full);
-    auto stride = windowBuffer.stride;
-    for (int i = 0; i < h; i++) {
-        auto *dst = &surface_buf[(area->y1 + i) * stride + area->x1];
-        memcpy(dst, &src[i * w], sizeof(uint16_t) * w);
-    }
-    auto *dst = (uint32_t *) windowBuffer.bits;
-    memcpy(dst, surface_buf, surface_size);
     ANativeWindow_unlockAndPost(window);
     lv_disp_flush_ready(disp);
 }
@@ -44,9 +46,7 @@ void LVApp::start(ANativeWindow *win) {
     this->window = win;
     screen_width = ANativeWindow_getWidth(window);
     screen_height = ANativeWindow_getHeight(window);
-
     ANativeWindow_setBuffersGeometry(window, app_width, app_height, WINDOW_FORMAT_RGB_565);
-    ANativeWindow_acquire(window);
     LOGD("LV Screen [%d x %d]", app_width, app_height);
     is_running = true;
     thread lv_thread(&LVApp::lv_loop_task, this);
@@ -54,6 +54,7 @@ void LVApp::start(ANativeWindow *win) {
 }
 
 void LVApp::lv_loop_task() {
+    LOGD("LV Task Start!!");
     lv_init();
     size_t buf_size = sizeof(lv_color_t) * app_width * app_height;
     auto *buf = malloc(buf_size);
@@ -79,19 +80,19 @@ void LVApp::lv_loop_task() {
         lv_app_func = search->second;
     }
     lv_app_func();
-
+    ANativeWindow_acquire(window);
     while (is_running) {
         lv_task_handler();
-        lv_tick_inc(5);
-        this_thread::sleep_for(chrono::milliseconds(4));
+        lv_tick_inc(4);
+        usleep(1000);
     }
+    ANativeWindow_release(window);
     lv_deinit();
     free(buf);
     if (surface_buf != nullptr) {
         free(surface_buf);
         surface_buf = nullptr;
     }
-    ANativeWindow_release(window);
     window = nullptr;
     LOGD("LV App Stopped!!");
 }
