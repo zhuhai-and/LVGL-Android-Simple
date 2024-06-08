@@ -8,7 +8,7 @@
 using namespace std;
 
 void LVApp::lv_flush_callback(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
-    if (ANativeWindow_lock(window, &windowBuffer, nullptr) == 0) {
+    if (is_running) {
         if (surface_buf == nullptr) {
             surface_size = sizeof(uint16_t) * windowBuffer.stride * windowBuffer.height;
             surface_buf = (uint16_t *) malloc(surface_size);
@@ -21,10 +21,12 @@ void LVApp::lv_flush_callback(lv_disp_drv_t *disp, const lv_area_t *area, lv_col
             auto *dst = &surface_buf[(area->y1 + i) * stride + area->x1];
             memcpy(dst, &src[i * w], sizeof(uint16_t) * w);
         }
-        auto *dst = (uint32_t *) windowBuffer.bits;
-        memcpy(dst, surface_buf, surface_size);
+        if (ANativeWindow_lock(window, &windowBuffer, nullptr) == 0) {
+            auto *dst = (uint32_t *) windowBuffer.bits;
+            memcpy(dst, surface_buf, surface_size);
+            ANativeWindow_unlockAndPost(window);
+        }
     }
-    ANativeWindow_unlockAndPost(window);
     lv_disp_flush_ready(disp);
 }
 
@@ -81,14 +83,12 @@ void LVApp::lv_loop_task() {
     }
     lv_app_func();
     ANativeWindow_acquire(window);
+    if (ANativeWindow_lock(window, &windowBuffer, nullptr) == 0) {
+        ANativeWindow_unlockAndPost(window);
+    }
     while (is_running) {
-        auto start = clock();
-        lv_task_handler();
-        lv_tick_inc(10);
-        auto period = clock() - start;
-        if (period < 4000) {
-            usleep(4000 - period);
-        }
+        lv_timer_handler();
+        usleep(1000);
     }
     ANativeWindow_release(window);
     lv_deinit();
