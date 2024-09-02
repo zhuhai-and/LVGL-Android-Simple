@@ -45,6 +45,13 @@
             android:text="Game Tetris" />
 
         <Button
+            android:id="@+id/btn_chess"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Game Chess" />
+
+        <Button
             android:id="@+id/btn_large"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

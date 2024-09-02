@@ -21,6 +21,10 @@ public class LVApp {
         return nSetApp(mInstanceId, name);
     }
 
+    public long setSize(int width, int height) {
+        return nSetSize(mInstanceId, width, height);
+    }
+
     public long onTouch(int touch, int x, int y) {
         return nOnTouch(mInstanceId, touch, x, y);
     }
@@ -41,6 +45,8 @@ public class LVApp {
     private static native long nStart(long id, Surface surface);
 
     private static native long nOnTouch(long id, int touch, int x, int y);
+
+    private static native long nSetSize(long id, int w, int h);
 
     private static native long nStop(long id);
 

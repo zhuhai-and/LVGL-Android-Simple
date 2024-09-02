@@ -34,6 +34,10 @@ public class LVGLView extends SurfaceView implements SurfaceHolder.Callback {
         mLVApp.setApp(name);
     }
 
+    public void setSize(int width, int height) {
+        mLVApp.setSize(width, height);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int x = (int) event.getX();

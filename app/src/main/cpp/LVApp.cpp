@@ -124,3 +124,8 @@ void LVApp::lv_touch_cb_static(lv_indev_drv_t *indev_driver, lv_indev_data_t *da
 void LVApp::setApp(const char *name) {
     this->app_name = name;
 }
+
+void LVApp::setSize(int w, int h) {
+    app_width = w;
+    app_height = h;
+}

@@ -38,6 +38,12 @@ J_FUN(jlong, nSetApp)(JNIEnv *env, jclass clazz, jlong id, jstring _name) {
     return 0;
 }
 
+J_FUN(jlong, nSetSize)(JNIEnv *env, jclass clazz, jlong id, jint w, jint h) {
+    auto *p = (LVApp *) id;
+    p->setSize(w, h);
+    return 0;
+}
+
 J_FUN(jlong, nStart)(JNIEnv *env, jclass clazz, jlong id, jobject surface) {
     auto *p = (LVApp *) id;
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);

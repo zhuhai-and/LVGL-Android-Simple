@@ -23,12 +23,19 @@ public class MainActivity extends AppCompatActivity {
         mB.btnBenchmark.setOnClickListener(v -> openPartPage("benchmark"));
         mB.btnPvz.setOnClickListener(v -> openPartPage("pvz"));
         mB.btnTetris.setOnClickListener(v -> openPartPage("tetris"));
+        mB.btnChess.setOnClickListener(v -> openPartPage("chess", 320, 480));
         mB.btnLarge.setOnClickListener(v -> ActivityUtils.startActivity(FullScreenActivity.class));
     }
 
     private void openPartPage(String name) {
+        openPartPage(name, 480, 320);
+    }
+
+    private void openPartPage(String name, int width, int height) {
         Intent intent = new Intent(this, PartScreenActivity.class);
         intent.putExtra("app", name);
+        intent.putExtra("width", width);
+        intent.putExtra("height", height);
         startActivity(intent);
     }
 }

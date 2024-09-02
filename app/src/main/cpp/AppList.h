@@ -6,6 +6,7 @@
 #include <lv_demos.h>
 #include "pvz/pvz.h"
 #include "tetris/cubegame.h"
+#include "chess/LvChess.h"
 
 using namespace std;
 
@@ -15,7 +16,8 @@ const map<string, void (*)(void)> lv_ci_example_list{
         {"widgets",   lv_demo_widgets},
         {"music",     lv_demo_music},
         {"pvz",       pvz_start},
-        {"tetris",    cube_game_start}
+        {"tetris",    cube_game_start},
+        {"chess",    lv_chess_start}
 };
 
 #endif //LVGLPORTANDROID_APPLIST_H

@@ -21,8 +21,8 @@ LOCAL_SRC_FILES := \
 	$(wildcard $(LV_PATH)/demos/**/**/*.c) \
 	$(wildcard $(LOCAL_PATH)/**/*.c) \
 	$(wildcard $(LOCAL_PATH)/*.cpp) \
-	$(wildcard $(LOCAL_PATH)/lvapp/*.cpp) \
-	$(wildcard $(LOCAL_PATH)/lvapp/*.c)
+	$(wildcard $(LOCAL_PATH)/chess/*.cpp) \
+    $(wildcard $(LOCAL_PATH)/chess/imgs/*.c) \
 
 LOCAL_CFLAGS += -ffunction-sections -fdata-sections -fvisibility=hidden
 LOCAL_LDFLAGS += -Wl,--gc-sections

@@ -42,6 +42,8 @@ public:
 
     void onTouch(int touch, int x, int y);
 
+    void setSize(int w, int h);
+
     void stop();
 };
 
